@@ -83,7 +83,7 @@ void fullKeyboardUpdate() {
             // Visual indicator
             digitalWrite(kLedPin, HIGH);
             // If the last thing printed wasn't a prosign, add a space
-            if(allowSpaceInserted && keyReleasedTimer > kLengthGapWord * averageElementSize){
+            if (allowSpaceInserted && keyReleasedTimer > kLengthGapWord * averageElementSize) {
                 Keyboard.print(' ');
             }
             keyReleasedTimer = 0;
@@ -101,11 +101,11 @@ void fullKeyboardUpdate() {
             keyPressedTimer = 0;
         }
 
-        if (keyReleasedTimer > kLengthGapLetter * averageElementSize){
+        if (keyReleasedTimer > kLengthGapLetter * averageElementSize) {
             char key = getLetter(elements);
-            if(key){
+            if (key) {
                 clearElements(elements);
-                if(key != eraseLetter){
+                if (key != eraseLetter) {
                     allowSpaceInserted = isPrintable(key);
                     Keyboard.print(key);
 
@@ -118,158 +118,158 @@ void fullKeyboardUpdate() {
     }
 }
 
-void clearElements(byte elements[]){
-    for(byte i = 0; i < kNumberOfElementsToTrack; i++){
+void clearElements(byte elements[]) {
+    for (byte i = 0; i < kNumberOfElementsToTrack; i++) {
         elements = 0;
     }
 }
-void updateElements(byte elements[], unsigned short keyPressTime){
+void updateElements(byte elements[], unsigned short keyPressTime) {
     // Get our next available index
     byte currentCapacity = elements[0];
     // First spot is used to track current capacity
-    if(currentCapacity < kNumberOfElementsToTrack - 1){
+    if (currentCapacity < kNumberOfElementsToTrack - 1) {
         currentCapacity++;
         elements[currentCapacity] = keyPressTime > 255 ? 255 : (byte)keyPressTime;
         elements[0] = currentCapacity;
     }
 }
-bool isDot(byte length){
+bool isDot(byte length) {
     return length < kLengthDot * averageElementSize;
 }
-bool isDash(byte length){
+bool isDash(byte length) {
     return length < kLengthDash * averageElementSize;
 }
-char getLetter(byte elements[]){
+char getLetter(byte elements[]) {
     byte currentCapacity = elements[0];
-    if (currentCapacity < 1){
+    if (currentCapacity < 1) {
         return 0; // Nothing yet
     }
     // Morse tree
-    if (currentCapacity == 1){
+    if (currentCapacity == 1) {
         //.
-        if(isDot(elements[1]))
+        if (isDot(elements[1]))
             return 'e';
         //-
-        else if(isDash(elements[1]))
+        else if (isDash(elements[1]))
             return 't';
         else return eraseLetter;
-    } else if(currentCapacity == 2){
+    } else if (currentCapacity == 2) {
         //..
-        if(isDot(elements[1]) && isDot(elements[2]))
+        if (isDot(elements[1]) && isDot(elements[2]))
             return 'i';
         //.-
-        if(isDot(elements[1]) && isDash(elements[2]))
+        if (isDot(elements[1]) && isDash(elements[2]))
             return 'a';
         //--
-        else if(isDash(elements[1]) && isDash(elements[2]))
+        else if (isDash(elements[1]) && isDash(elements[2]))
             return 'm';
         //-.
-        else if(isDash(elements[1]) && isDot(elements[2]))
+        else if (isDash(elements[1]) && isDot(elements[2]))
             return 'n';
         else return eraseLetter;
-    } else if(currentCapacity == 3){
+    } else if (currentCapacity == 3) {
         //...
-        if(isDot(elements[1]) && isDot(elements[2])&&isDot(elements[3]))
+        if (isDot(elements[1]) && isDot(elements[2]) && isDot(elements[3]))
             return 's';
         //..-
-        if(isDot(elements[1]) && isDot(elements[2])&&isDash(elements[3]))
+        if (isDot(elements[1]) && isDot(elements[2]) && isDash(elements[3]))
             return 'u';
         //.-.
-        if(isDot(elements[1]) && isDash(elements[2])&&isDot(elements[3]))
+        if (isDot(elements[1]) && isDash(elements[2]) && isDot(elements[3]))
             return 'r';
         //.--
-        if(isDot(elements[1]) && isDash(elements[2])&&isDash(elements[3]))
+        if (isDot(elements[1]) && isDash(elements[2]) && isDash(elements[3]))
             return 'w';
         //--.
-        else if(isDash(elements[1]) && isDash(elements[2])&&isDot(elements[3]))
+        else if (isDash(elements[1]) && isDash(elements[2]) && isDot(elements[3]))
             return 'g';
         //---
-        else if(isDash(elements[1]) && isDash(elements[2])&&isDash(elements[3]))
+        else if (isDash(elements[1]) && isDash(elements[2]) && isDash(elements[3]))
             return 'o';
         //-..
-        else if(isDash(elements[1]) && isDot(elements[2])&&isDot(elements[3]))
+        else if (isDash(elements[1]) && isDot(elements[2]) && isDot(elements[3]))
             return 'd';
         //-.-
-        else if(isDash(elements[1]) && isDot(elements[2])&&isDash(elements[3]))
+        else if (isDash(elements[1]) && isDot(elements[2]) && isDash(elements[3]))
             return 'k';
         else return eraseLetter;
-    } else if(currentCapacity == 4){
+    } else if (currentCapacity == 4) {
         //....
-        if(isDot(elements[1]) && isDot(elements[2])&&isDot(elements[3])&&isDot(elements[4]))
+        if (isDot(elements[1]) && isDot(elements[2]) && isDot(elements[3]) && isDot(elements[4]))
             return 'h';
         //...-
-        if(isDot(elements[1]) && isDot(elements[2])&&isDot(elements[3])&&isDash(elements[4]))
+        if (isDot(elements[1]) && isDot(elements[2]) && isDot(elements[3]) && isDash(elements[4]))
             return 'v';
         //..-.
-        if(isDot(elements[1]) && isDot(elements[2])&&isDash(elements[3])&&isDot(elements[4]))
+        if (isDot(elements[1]) && isDot(elements[2]) && isDash(elements[3]) && isDot(elements[4]))
             return 'f';
         //.-..
-        if(isDot(elements[1]) && isDash(elements[2])&&isDot(elements[3])&&isDot(elements[4]))
+        if (isDot(elements[1]) && isDash(elements[2]) && isDot(elements[3]) && isDot(elements[4]))
             return 'l';
         //.--.
-        if(isDot(elements[1]) && isDash(elements[2])&&isDash(elements[3])&&isDot(elements[4]))
+        if (isDot(elements[1]) && isDash(elements[2]) && isDash(elements[3]) && isDot(elements[4]))
             return 'p';
         //.---
-        if(isDot(elements[1]) && isDash(elements[2])&&isDash(elements[3])&&isDash(elements[4]))
+        if (isDot(elements[1]) && isDash(elements[2]) && isDash(elements[3]) && isDash(elements[4]))
             return 'j';
         //--..
-        else if(isDash(elements[1]) && isDash(elements[2])&&isDot(elements[3])&&isDot(elements[4]))
+        else if (isDash(elements[1]) && isDash(elements[2]) && isDot(elements[3]) && isDot(elements[4]))
             return 'z';
         //--.-
-        else if(isDash(elements[1]) && isDash(elements[2])&&isDot(elements[3])&&isDash(elements[4]))
+        else if (isDash(elements[1]) && isDash(elements[2]) && isDot(elements[3]) && isDash(elements[4]))
             return 'q';
         //-...
-        else if(isDash(elements[1]) && isDot(elements[2])&&isDot(elements[3])&&isDot(elements[4]))
+        else if (isDash(elements[1]) && isDot(elements[2]) && isDot(elements[3]) && isDot(elements[4]))
             return 'b';
         //-..-
-        else if(isDash(elements[1]) && isDot(elements[2])&&isDot(elements[3])&&isDash(elements[4]))
+        else if (isDash(elements[1]) && isDot(elements[2]) && isDot(elements[3]) && isDash(elements[4]))
             return 'x';
         //-.-.
-        else if(isDash(elements[1]) && isDot(elements[2])&&isDash(elements[3])&&isDot(elements[4]))
+        else if (isDash(elements[1]) && isDot(elements[2]) && isDash(elements[3]) && isDot(elements[4]))
             return 'c';
         //-.--
-        else if(isDash(elements[1]) && isDot(elements[2])&&isDash(elements[3])&&isDash(elements[4]))
+        else if (isDash(elements[1]) && isDot(elements[2]) && isDash(elements[3]) && isDash(elements[4]))
             return 'y';
         else return eraseLetter;
-    } else if(currentCapacity == 5){
+    } else if (currentCapacity == 5) {
         //.....
-        if(isDot(elements[1]) && isDot(elements[2])&&isDot(elements[3])&&isDot(elements[4])&&isDot(elements[5]))
+        if (isDot(elements[1]) && isDot(elements[2]) && isDot(elements[3]) && isDot(elements[4]) && isDot(elements[5]))
             return '5';
         //....-
-        if(isDot(elements[1]) && isDot(elements[2])&&isDot(elements[3])&&isDot(elements[4])&&isDash(elements[5]))
+        if (isDot(elements[1]) && isDot(elements[2]) && isDot(elements[3]) && isDot(elements[4]) && isDash(elements[5]))
             return '4';
         //...--
-        if(isDot(elements[1]) && isDot(elements[2])&&isDot(elements[3])&&isDash(elements[4])&&isDash(elements[5]))
+        if (isDot(elements[1]) && isDot(elements[2]) && isDot(elements[3]) && isDash(elements[4]) && isDash(elements[5]))
             return '3';
         //..---
-        if(isDot(elements[1]) && isDot(elements[2])&&isDash(elements[3])&&isDash(elements[4])&&isDash(elements[5]))
+        if (isDot(elements[1]) && isDot(elements[2]) && isDash(elements[3]) && isDash(elements[4]) && isDash(elements[5]))
             return '2';
         //.-.-.
-        if(isDot(elements[1]) && isDash(elements[2])&&isDot(elements[3])&&isDash(elements[4])&&isDot(elements[5]))
+        if (isDot(elements[1]) && isDash(elements[2]) && isDot(elements[3]) && isDash(elements[4]) && isDot(elements[5]))
             return '\n';
         //.----
-        if(isDot(elements[1]) && isDash(elements[2])&&isDash(elements[3])&&isDash(elements[4])&&isDash(elements[5]))
+        if (isDot(elements[1]) && isDash(elements[2]) && isDash(elements[3]) && isDash(elements[4]) && isDash(elements[5]))
             return '1';
         //-....
-        else if(isDash(elements[1]) && isDot(elements[2])&&isDot(elements[3])&&isDot(elements[4])&&isDot(elements[5]))
+        else if (isDash(elements[1]) && isDot(elements[2]) && isDot(elements[3]) && isDot(elements[4]) && isDot(elements[5]))
             return '6';
         //--...
-        else if(isDash(elements[1]) && isDash(elements[2])&&isDot(elements[3])&&isDot(elements[4])&&isDot(elements[5]))
+        else if (isDash(elements[1]) && isDash(elements[2]) && isDot(elements[3]) && isDot(elements[4]) && isDot(elements[5]))
             return '7';
         //---..
-        else if(isDash(elements[1]) && isDash(elements[2])&&isDash(elements[3])&&isDot(elements[4])&&isDot(elements[5]))
+        else if (isDash(elements[1]) && isDash(elements[2]) && isDash(elements[3]) && isDot(elements[4]) && isDot(elements[5]))
             return '8';
         //----.
-        else if(isDash(elements[1]) && isDash(elements[2])&&isDash(elements[3])&&isDash(elements[4])&&isDot(elements[5]))
+        else if (isDash(elements[1]) && isDash(elements[2]) && isDash(elements[3]) && isDash(elements[4]) && isDot(elements[5]))
             return '9';
         //-----
-        else if(isDash(elements[1]) && isDash(elements[2])&&isDash(elements[3])&&isDash(elements[4])&&isDash(elements[5]))
+        else if (isDash(elements[1]) && isDash(elements[2]) && isDash(elements[3]) && isDash(elements[4]) && isDash(elements[5]))
             return '0';
         else return eraseLetter;
-    } else if(currentCapacity == 8){
+    } else if (currentCapacity == 8) {
         //........(Backspace)
-        for(byte i = 0; i < currentCapacity; i++){
-            if(!isDot(elements[i+1])){
+        for (byte i = 0; i < currentCapacity; i++) {
+            if (!isDot(elements[i + 1])) {
                 return eraseLetter;
             }
         }
