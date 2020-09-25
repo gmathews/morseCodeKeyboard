@@ -120,7 +120,7 @@ void fullKeyboardUpdate() {
 
 void clearElements(byte elements[]) {
     for (byte i = 0; i < kNumberOfElementsToTrack; i++) {
-        elements = 0;
+        elements[i] = 0;
     }
 }
 void updateElements(byte elements[], unsigned short keyPressTime) {
