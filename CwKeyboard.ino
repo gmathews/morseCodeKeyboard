@@ -29,9 +29,7 @@ bool allowSpaceInserted;
 byte elements[kNumberOfElementsToTrack];
 // Used to determine what is a dash, dot, etc...
 unsigned short averageElementSize;
-unsigned byte elementTolerance;
-
-unsigned byte elementTolerance;
+byte elementTolerance;
 
 void resetStateOnModeSwitch() {
     modeTimer = 0;
@@ -155,17 +153,12 @@ bool isDash(byte length) {
     return length < kLengthDash * averageElementSize;
 }
 
-bool isElementGap(byte length){
-    // TODO: Require minimum length to encourage good keying
-
-}
-
-bool isLetterGap(byte length){
+bool isLetterGap(byte length) {
     // TODO: Require minimum length to encourage good keying
     return length > kLengthGapLetter * averageElementSize;
 }
 
-bool isSpace(byte length){
+bool isSpace(byte length) {
     // TODO: Require minimum length to encourage good keying
     return length > kLengthGapWord * averageElementSize;
 }
