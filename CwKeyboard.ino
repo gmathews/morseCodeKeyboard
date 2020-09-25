@@ -85,7 +85,10 @@ void fullKeyboardUpdate() {
             // If the last thing printed wasn't a prosign, add a space
             if (allowSpaceInserted && keyReleasedTimer > kLengthGapWord * averageElementSize) {
                 Keyboard.print(' ');
+                // Debug what happened
+                Serial.write(' ');
             }
+            allowSpaceInserted = false;
             keyReleasedTimer = 0;
         }
         updateTimer(&keyPressedTimer);
