@@ -9,23 +9,29 @@ const unsigned short kMaxTimerValue = 65535;
 // NOTE: The first byte is used to track our used capacity
 const byte kNumberOfElementsToTrack = 9;
 // Used to clear the current letter if there is an error
-const char eraseLetter = 0x18;
+const char kEraseLetter = 0x18;
 // Define length of elements
 const byte kLengthDot = 1;
 const byte kLengthDash = 3;
 const byte kLengthGapElement = 1;
 const byte kLengthGapLetter = 3;
 const byte kLengthGapWord = 7;
+// +/- percentage that an element can be off by and still count
+const float kElementSizeTolerance = 0.20;
 
 // State variables
 bool fullKeyboardMode;
 unsigned short modeTimer;
 unsigned short keyPressedTimer;
 unsigned short keyReleasedTimer;
-unsigned short averageElementSize;
 bool allowSpaceInserted;
 // The size of each element
 byte elements[kNumberOfElementsToTrack];
+// Used to determine what is a dash, dot, etc...
+unsigned short averageElementSize;
+unsigned byte elementTolerance;
+
+unsigned byte elementTolerance;
 
 void resetStateOnModeSwitch() {
     modeTimer = 0;
@@ -34,6 +40,7 @@ void resetStateOnModeSwitch() {
     allowSpaceInserted = false;
     clearElements(elements);
     averageElementSize = 24; // Hard code for now
+    elementTolerance = averageElementSize * kElementSizeTolerance;
     // Make sure we don't get stuck
     Keyboard.releaseAll();
 }
@@ -83,7 +90,7 @@ void fullKeyboardUpdate() {
             // Visual indicator
             digitalWrite(kLedPin, HIGH);
             // If the last thing printed wasn't a prosign, add a space
-            if (allowSpaceInserted && keyReleasedTimer > kLengthGapWord * averageElementSize) {
+            if (allowSpaceInserted && isSpace(keyReleasedTimer)) {
                 Keyboard.print(' ');
                 // Debug what happened
                 Serial.write(' ');
@@ -104,11 +111,11 @@ void fullKeyboardUpdate() {
             keyPressedTimer = 0;
         }
 
-        if (keyReleasedTimer > kLengthGapLetter * averageElementSize) {
+        if (isLetterGap(keyReleasedTimer)) {
             char key = getLetter(elements);
             if (key) {
                 clearElements(elements);
-                if (key != eraseLetter) {
+                if (key != kEraseLetter) {
                     allowSpaceInserted = isPrintable(key);
                     Keyboard.print(key);
 
@@ -122,10 +129,10 @@ void fullKeyboardUpdate() {
 }
 
 void clearElements(byte elements[]) {
-    for (byte i = 0; i < kNumberOfElementsToTrack; i++) {
-        elements[i] = 0;
-    }
+    // We can clear everything by clearing the capacity
+    elements[0] = 0;
 }
+
 void updateElements(byte elements[], unsigned short keyPressTime) {
     // Get our next available index
     byte currentCapacity = elements[0];
@@ -136,12 +143,33 @@ void updateElements(byte elements[], unsigned short keyPressTime) {
         elements[0] = currentCapacity;
     }
 }
+
 bool isDot(byte length) {
+    // TODO: Require minimum length to encourage good keying
+    // elementTolerance
     return length < kLengthDot * averageElementSize;
 }
+
 bool isDash(byte length) {
+    // TODO: Require minimum length to encourage good keying
     return length < kLengthDash * averageElementSize;
 }
+
+bool isElementGap(byte length){
+    // TODO: Require minimum length to encourage good keying
+
+}
+
+bool isLetterGap(byte length){
+    // TODO: Require minimum length to encourage good keying
+    return length > kLengthGapLetter * averageElementSize;
+}
+
+bool isSpace(byte length){
+    // TODO: Require minimum length to encourage good keying
+    return length > kLengthGapWord * averageElementSize;
+}
+
 char getLetter(byte elements[]) {
     byte currentCapacity = elements[0];
     if (currentCapacity < 1) {
@@ -155,7 +183,7 @@ char getLetter(byte elements[]) {
         //-
         else if (isDash(elements[1]))
             return 't';
-        else return eraseLetter;
+        else return kEraseLetter;
     } else if (currentCapacity == 2) {
         //..
         if (isDot(elements[1]) && isDot(elements[2]))
@@ -169,7 +197,7 @@ char getLetter(byte elements[]) {
         //-.
         else if (isDash(elements[1]) && isDot(elements[2]))
             return 'n';
-        else return eraseLetter;
+        else return kEraseLetter;
     } else if (currentCapacity == 3) {
         //...
         if (isDot(elements[1]) && isDot(elements[2]) && isDot(elements[3]))
@@ -195,7 +223,7 @@ char getLetter(byte elements[]) {
         //-.-
         else if (isDash(elements[1]) && isDot(elements[2]) && isDash(elements[3]))
             return 'k';
-        else return eraseLetter;
+        else return kEraseLetter;
     } else if (currentCapacity == 4) {
         //....
         if (isDot(elements[1]) && isDot(elements[2]) && isDot(elements[3]) && isDot(elements[4]))
@@ -233,7 +261,7 @@ char getLetter(byte elements[]) {
         //-.--
         else if (isDash(elements[1]) && isDot(elements[2]) && isDash(elements[3]) && isDash(elements[4]))
             return 'y';
-        else return eraseLetter;
+        else return kEraseLetter;
     } else if (currentCapacity == 5) {
         //.....
         if (isDot(elements[1]) && isDot(elements[2]) && isDot(elements[3]) && isDot(elements[4]) && isDot(elements[5]))
@@ -268,18 +296,18 @@ char getLetter(byte elements[]) {
         //-----
         else if (isDash(elements[1]) && isDash(elements[2]) && isDash(elements[3]) && isDash(elements[4]) && isDash(elements[5]))
             return '0';
-        else return eraseLetter;
+        else return kEraseLetter;
     } else if (currentCapacity == 8) {
         //........(Backspace)
         for (byte i = 0; i < currentCapacity; i++) {
             if (!isDot(elements[i + 1])) {
-                return eraseLetter;
+                return kEraseLetter;
             }
         }
         return 0x08; // Backspace
     }
     // Bad char
-    return eraseLetter;
+    return kEraseLetter;
 }
 
 void practiceKeyboardUpdate() {
