@@ -148,10 +148,18 @@ bool isLengthWithinTolerance(byte length, byte desiredLength){
 }
 
 bool isDot(byte length) {
+    Serial.print(". Desired: ");
+    Serial.print(kLengthDot * averageElementSize);
+    Serial.print(" Actual: ");
+    Serial.println(length);
     return isLengthWithinTolerance(length, kLengthDot);
 }
 
 bool isDash(byte length) {
+    Serial.print("- Desired: ");
+    Serial.print(kLengthDash * averageElementSize);
+    Serial.print(" Actual: ");
+    Serial.println(length);
     return isLengthWithinTolerance(length, kLengthDash);
 }
 
