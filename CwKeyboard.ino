@@ -142,7 +142,7 @@ void updateElements(byte elements[], unsigned short keyPressTime) {
     }
 }
 
-byte isLengthWithinTolerance(length, desiredLength){
+bool isLengthWithinTolerance(byte length, byte desiredLength){
     // Require minimum length to encourage good keying
     return length > (desiredLength * averageElementSize - elementTolerance) && length < (desiredLength * averageElementSize + elementTolerance);
 }
