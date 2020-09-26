@@ -142,7 +142,7 @@ void updateElements(byte elements[], unsigned short keyPressTime) {
     }
 }
 
-bool isLengthWithinTolerance(byte length, byte desiredLength){
+bool isLengthWithinTolerance(byte length, byte desiredLength) {
     // Require minimum length to encourage good keying
     return length > (desiredLength * averageElementSize - elementTolerance) && length < (desiredLength * averageElementSize + elementTolerance);
 }
@@ -150,6 +150,8 @@ bool isLengthWithinTolerance(byte length, byte desiredLength){
 bool isDot(byte length) {
     Serial.print(". Desired: ");
     Serial.print(kLengthDot * averageElementSize);
+    Serial.print(" +/- ");
+    Serial.println(elementTolerance);
     Serial.print(" Actual: ");
     Serial.println(length);
     return isLengthWithinTolerance(length, kLengthDot);
@@ -158,6 +160,8 @@ bool isDot(byte length) {
 bool isDash(byte length) {
     Serial.print("- Desired: ");
     Serial.print(kLengthDash * averageElementSize);
+    Serial.print(" +/- ");
+    Serial.println(elementTolerance);
     Serial.print(" Actual: ");
     Serial.println(length);
     return isLengthWithinTolerance(length, kLengthDash);
