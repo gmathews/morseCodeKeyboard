@@ -142,25 +142,25 @@ void updateElements(byte elements[], unsigned short keyPressTime) {
     }
 }
 
+byte isLengthWithinTolerance(length, desiredLength){
+    // Require minimum length to encourage good keying
+    return length > (desiredLength * averageElementSize - elementTolerance) && length < (desiredLength * averageElementSize + elementTolerance);
+}
+
 bool isDot(byte length) {
-    // TODO: Require minimum length to encourage good keying
-    // elementTolerance
-    return length < kLengthDot * averageElementSize;
+    return isLengthWithinTolerance(length, kLengthDot);
 }
 
 bool isDash(byte length) {
-    // TODO: Require minimum length to encourage good keying
-    return length < kLengthDash * averageElementSize;
+    return isLengthWithinTolerance(length, kLengthDash);
 }
 
 bool isLetterGap(byte length) {
-    // TODO: Require minimum length to encourage good keying
-    return length > kLengthGapLetter * averageElementSize;
+    return isLengthWithinTolerance(length, kLengthGapLetter);
 }
 
 bool isSpace(byte length) {
-    // TODO: Require minimum length to encourage good keying
-    return length > kLengthGapWord * averageElementSize;
+    return isLengthWithinTolerance(length, kLengthGapWord);
 }
 
 char getLetter(byte elements[]) {
