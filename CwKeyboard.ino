@@ -17,7 +17,7 @@ const byte kLengthGapElement = 1;
 const byte kLengthGapLetter = 3;
 const byte kLengthGapWord = 7;
 // +/- percentage that an element can be off by and still count
-const float kElementSizeTolerance = 0.20;
+const float kElementSizeTolerance = 0.25;
 
 // State variables
 bool fullKeyboardMode;
