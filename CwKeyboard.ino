@@ -21,7 +21,7 @@ const byte kLengthGapWord = 7;
 const float kElementSizeTolerance = 0.25;
 const short kMaxSpeedPinValue = 3200;
 const short kMinSpeedPinValue = 0;
-const byte kMinimumElementSize = 2;
+const byte kMinimumElementSize = 6;
 const byte kMaxElementSize = 30;
 
 // State variables
@@ -45,8 +45,6 @@ void resetStateOnModeSwitch() {
     beatIndicator = false;
     allowSpaceInserted = false;
     clearElements(elements);
-    averageElementSize = 24; // Hard code for now
-    elementTolerance = averageElementSize * kElementSizeTolerance;
     // Make sure we don't get stuck
     Keyboard.releaseAll();
 }
@@ -92,17 +90,20 @@ void loop() {
 
 byte calculateSpeed() {
     float speedPinValue = analogRead(kSpeedPin);
-    Serial.print("speedPin value: ");
-    Serial.print(speedPinValue);
     byte speedToElementSize = kMinimumElementSize + ((speedPinValue / (kMaxSpeedPinValue - kMinSpeedPinValue)) * (kMaxElementSize - kMinimumElementSize));
-    Serial.print(" element size: ");
-    Serial.println(speedToElementSize);
+    if(speedToElementSize !=averageElementSize){
+        Serial.print("speedPin value: ");
+        Serial.print(speedPinValue);
+        Serial.print(" element size: ");
+        Serial.println(speedToElementSize);
+    }
     return speedToElementSize;
 }
 
 void fullKeyboardUpdate() {
     // Set averageElementSize to kSpeedPin's analog value
     averageElementSize = calculateSpeed();
+    elementTolerance = averageElementSize * kElementSizeTolerance;
 
     if (digitalRead(kKeyPin) == LOW) {
         // Key down
@@ -119,7 +120,7 @@ void fullKeyboardUpdate() {
         updateTimer(&keyPressedTimer);
 
         // Visual indicator that right now is a good time to release if you want a dot or a dash
-        if (!beatIndicator && (isDot(keyPressedTimer) || isDash(keyPressedTimer))) {
+        if (!beatIndicator && (isDot(keyPressedTimer, false) || isDash(keyPressedTimer, false))) {
             digitalWrite(kLedPin, HIGH);
             beatIndicator = true;
         } else if (beatIndicator) {
@@ -178,22 +179,32 @@ bool isLengthWithinTolerance(byte length, byte desiredLength) {
 }
 
 bool isDot(byte length) {
-    Serial.print(". Desired: ");
-    Serial.print(kLengthDot * averageElementSize);
-    Serial.print(" +/- ");
-    Serial.println(elementTolerance);
-    Serial.print(" Actual: ");
-    Serial.println(length);
+    return isDot(length, true);
+}
+bool isDot(byte length, bool print) {
+    if(print){
+        Serial.print(". Desired: ");
+        Serial.print(kLengthDot * averageElementSize);
+        Serial.print(" +/- ");
+        Serial.println(elementTolerance);
+        Serial.print(" Actual: ");
+        Serial.println(length);
+    }
     return isLengthWithinTolerance(length, kLengthDot);
 }
 
 bool isDash(byte length) {
-    Serial.print("- Desired: ");
-    Serial.print(kLengthDash * averageElementSize);
-    Serial.print(" +/- ");
-    Serial.println(elementTolerance);
-    Serial.print(" Actual: ");
-    Serial.println(length);
+    return isDash(length, true);
+}
+bool isDash(byte length, bool print) {
+    if(print){
+        Serial.print("- Desired: ");
+        Serial.print(kLengthDash * averageElementSize);
+        Serial.print(" +/- ");
+        Serial.println(elementTolerance);
+        Serial.print(" Actual: ");
+        Serial.println(length);
+    }
     return isLengthWithinTolerance(length, kLengthDash);
 }
 
