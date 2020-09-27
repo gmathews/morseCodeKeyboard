@@ -19,6 +19,10 @@ const byte kLengthGapLetter = 3;
 const byte kLengthGapWord = 7;
 // +/- percentage that an element can be off by and still count
 const float kElementSizeTolerance = 0.25;
+const short kMaxSpeedPinValue = 3200;
+const short kMinSpeedPinValue = 0;
+const byte kMinimumElementSize = 2;
+const byte kMaxElementSize = 30;
 
 // State variables
 bool fullKeyboardMode;
@@ -87,12 +91,13 @@ void loop() {
 }
 
 byte calculateSpeed() {
-    short speedPinValue = analogRead(kSpeedPin);
+    float speedPinValue = analogRead(kSpeedPin);
     Serial.print("speedPin value: ");
-    Serial.println(speedPinValue);
-    const short kMaxValue = 4096;
-    const short kMinValue = 990;
-    return 24;
+    Serial.print(speedPinValue);
+    byte speedToElementSize = kMinimumElementSize + ((speedPinValue / (kMaxSpeedPinValue - kMinSpeedPinValue)) * (kMaxElementSize - kMinimumElementSize));
+    Serial.print(" element size: ");
+    Serial.println(speedToElementSize);
+    return speedToElementSize;
 }
 
 void fullKeyboardUpdate() {
