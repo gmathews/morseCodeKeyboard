@@ -91,7 +91,7 @@ void loop() {
 byte calculateSpeed() {
     float speedPinValue = analogRead(kSpeedPin);
     byte speedToElementSize = kMinimumElementSize + ((speedPinValue / (kMaxSpeedPinValue - kMinSpeedPinValue)) * (kMaxElementSize - kMinimumElementSize));
-    if(speedToElementSize !=averageElementSize){
+    if (speedToElementSize != averageElementSize) {
         Serial.print("speedPin value: ");
         Serial.print(speedPinValue);
         Serial.print(" element size: ");
@@ -182,7 +182,7 @@ bool isDot(byte length) {
     return isDot(length, true);
 }
 bool isDot(byte length, bool print) {
-    if(print){
+    if (print) {
         Serial.print(". Desired: ");
         Serial.print(kLengthDot * averageElementSize);
         Serial.print(" +/- ");
@@ -197,7 +197,7 @@ bool isDash(byte length) {
     return isDash(length, true);
 }
 bool isDash(byte length, bool print) {
-    if(print){
+    if (print) {
         Serial.print("- Desired: ");
         Serial.print(kLengthDash * averageElementSize);
         Serial.print(" +/- ");
