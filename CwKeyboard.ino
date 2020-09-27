@@ -18,7 +18,7 @@ const byte kLengthGapElement = 1;
 const byte kLengthGapLetter = 3;
 const byte kLengthGapWord = 7;
 // +/- percentage that an element can be off by and still count
-const float kElementSizeTolerance = 0.25;
+const byte kElementSizeTolerance = 4;
 const short kMaxSpeedPinValue = 3200;
 const short kMinSpeedPinValue = 0;
 const byte kMinimumElementSize = 6;
@@ -103,7 +103,7 @@ byte calculateSpeed() {
 void fullKeyboardUpdate() {
     // Set averageElementSize to kSpeedPin's analog value
     averageElementSize = calculateSpeed();
-    elementTolerance = averageElementSize * kElementSizeTolerance;
+    elementTolerance = averageElementSize / kElementSizeTolerance;
 
     if (digitalRead(kKeyPin) == LOW) {
         // Key down
