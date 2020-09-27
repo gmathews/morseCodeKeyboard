@@ -2,6 +2,7 @@
 const byte kModePin = 0;
 const byte kKeyPin = 1;
 const byte kLedPin = 2;
+const byte kSpeedPin = 23;
 // Configuration constants
 const byte kMinModeSwitchPressCycles = 10;
 const int kSampleHz = 100;
@@ -24,17 +25,20 @@ bool fullKeyboardMode;
 unsigned short modeTimer;
 unsigned short keyPressedTimer;
 unsigned short keyReleasedTimer;
+// Used for LED indicator if releasing would cause a dot/dash
+bool beatIndicator;
 bool allowSpaceInserted;
 // The size of each element
 byte elements[kNumberOfElementsToTrack];
 // Used to determine what is a dash, dot, etc...
-unsigned short averageElementSize;
+byte averageElementSize;
 byte elementTolerance;
 
 void resetStateOnModeSwitch() {
     modeTimer = 0;
     keyPressedTimer = 0;
     keyReleasedTimer = 1; // Make sure we don't trigger key released logic
+    beatIndicator = false;
     allowSpaceInserted = false;
     clearElements(elements);
     averageElementSize = 24; // Hard code for now
@@ -47,6 +51,7 @@ void resetStateOnModeSwitch() {
 void setup() {
     // Setup our hardware
     Serial.begin(38400);
+    analogReadResolution(12);
     pinMode(kModePin, INPUT_PULLUP);
     pinMode(kKeyPin, INPUT_PULLUP);
     pinMode(kLedPin, OUTPUT);
@@ -81,12 +86,22 @@ void loop() {
     delay(1000 / kSampleHz);
 }
 
+byte calculateSpeed() {
+    short speedPinValue = analogRead(kSpeedPin);
+    Serial.print("speedPin value: ");
+    Serial.println(speedPinValue);
+    const short kMaxValue = 4096;
+    const short kMinValue = 990;
+    return 24;
+}
+
 void fullKeyboardUpdate() {
+    // Set averageElementSize to kSpeedPin's analog value
+    averageElementSize = calculateSpeed();
+
     if (digitalRead(kKeyPin) == LOW) {
         // Key down
         if (keyPressedTimer == 0) {
-            // Visual indicator
-            digitalWrite(kLedPin, HIGH);
             // If the last thing printed wasn't a prosign, add a space
             if (allowSpaceInserted && isSpace(keyReleasedTimer)) {
                 Keyboard.print(' ');
@@ -97,6 +112,16 @@ void fullKeyboardUpdate() {
             keyReleasedTimer = 0;
         }
         updateTimer(&keyPressedTimer);
+
+        // Visual indicator that right now is a good time to release if you want a dot or a dash
+        if (!beatIndicator && (isDot(keyPressedTimer) || isDash(keyPressedTimer))) {
+            digitalWrite(kLedPin, HIGH);
+            beatIndicator = true;
+        } else if (beatIndicator) {
+            digitalWrite(kLedPin, LOW);
+            beatIndicator = false;
+        }
+
     } else {
         // Key up
         if (keyReleasedTimer == 0) {
