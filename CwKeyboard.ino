@@ -120,7 +120,8 @@ void fullKeyboardUpdate() {
         updateTimer(&keyPressedTimer);
 
         // Visual indicator that right now is a good time to release if you want a dot or a dash
-        if (!beatIndicator && (isDot(keyPressedTimer, false) || isDash(keyPressedTimer, false))) {
+        // Do one frame in advance
+        if (!beatIndicator && (isDot(keyPressedTimer+1, false) || isDash(keyPressedTimer+1, false))) {
             digitalWrite(kLedPin, HIGH);
             beatIndicator = true;
         } else if (beatIndicator) {
