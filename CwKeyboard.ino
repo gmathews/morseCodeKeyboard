@@ -24,6 +24,7 @@ const float kElementSizeTolerance = 0.25;
 const short kMaxSpeedPinValue = 3200;
 const short kMinSpeedPinValue = 0;
 const byte kMinimumElementSize = 6;
+// WARNING: Do not exceed 36, else kLengthGapWord will have wraparound
 const byte kMaxElementSize = 30;
 
 // State variables
