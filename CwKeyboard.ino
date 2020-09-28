@@ -383,10 +383,10 @@ void practiceKeyboardUpdate() {
     }
     // Use this for the speed indicator
     updateTimer(&keyPressedTimer);
-    if (!beatIndicator && keyPressedTimer > timeToKeepLedOn) {
+    if (!beatIndicator && keyPressedTimer > timeToKeepLedOff) {
         digitalWrite(kLedPin, HIGH);
         beatIndicator = true;
-    } else if (keyPressedTimer > timeToKeepLedOff) {
+    } else if (keyPressedTimer > timeToKeepLedOff + timeToKeepLedOn) {
         digitalWrite(kLedPin, LOW);
         keyPressedTimer = 0;
         beatIndicator = false;
@@ -399,7 +399,7 @@ void indicateMode() {
     String modeStr = fullKeyboardMode ? "full keyboard" : "practice";
     Serial.println("Entered " + modeStr + " mode.");
     // Indicate our mode
-    digitalWrite(kLedPin, !fullKeyboardMode);
+    /* digitalWrite(kLedPin, !fullKeyboardMode); */
 }
 
 // Make sure we don't wrap around
