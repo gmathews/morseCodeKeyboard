@@ -1,3 +1,5 @@
+#include <Bounce.h>
+
 // Constants
 const byte kModePin = 0;
 const byte kKeyPin = 1;
@@ -18,7 +20,7 @@ const byte kLengthGapElement = 1;
 const byte kLengthGapLetter = 3;
 const byte kLengthGapWord = 7;
 // +/- percentage that an element can be off by and still count
-const byte kElementSizeTolerance = 4;
+const float kElementSizeTolerance = 0.25;
 const short kMaxSpeedPinValue = 3200;
 const short kMinSpeedPinValue = 0;
 const byte kMinimumElementSize = 6;
@@ -38,13 +40,18 @@ byte elements[kNumberOfElementsToTrack];
 byte averageElementSize;
 byte elementTolerance;
 
+// Track the status of the button and handle debounce
+bool keyPressed;
+Bounce pushbutton = Bounce(kKeyPin, 10);
+
 void resetStateOnModeSwitch() {
     modeTimer = 0;
     keyPressedTimer = 0;
-    keyReleasedTimer = 1; // Make sure we don't trigger key released logic
+    keyReleasedTimer = 0;
     beatIndicator = false;
     allowSpaceInserted = false;
     clearElements(elements);
+    keyPressed = false;
     // Make sure we don't get stuck
     Keyboard.releaseAll();
 }
@@ -84,8 +91,6 @@ void loop() {
         practiceKeyboardUpdate();
     }
 
-    // Don't sample all the time, take a break
-    delay(1000 / kSampleHz);
 }
 
 byte calculateSpeed() {
@@ -103,11 +108,12 @@ byte calculateSpeed() {
 void fullKeyboardUpdate() {
     // Set averageElementSize to kSpeedPin's analog value
     averageElementSize = calculateSpeed();
-    elementTolerance = averageElementSize / kElementSizeTolerance;
+    elementTolerance = averageElementSize * kElementSizeTolerance;
 
-    if (digitalRead(kKeyPin) == LOW) {
+    if (pushbutton.update()) {
         // Key down
-        if (keyPressedTimer == 0) {
+        if (pushbutton.fallingEdge()) {
+            keyPressed = true;
             // If the last thing printed wasn't a prosign, add a space
             if (allowSpaceInserted && isSpace(keyReleasedTimer)) {
                 Keyboard.print(' ');
@@ -116,22 +122,9 @@ void fullKeyboardUpdate() {
             }
             allowSpaceInserted = false;
             keyReleasedTimer = 0;
-        }
-        updateTimer(&keyPressedTimer);
-
-        // Visual indicator that right now is a good time to release if you want a dot or a dash
-        // Do one frame in advance
-        if (!beatIndicator && (isDot(keyPressedTimer+1, false) || isDash(keyPressedTimer+1, false))) {
-            digitalWrite(kLedPin, HIGH);
-            beatIndicator = true;
-        } else if (beatIndicator) {
-            digitalWrite(kLedPin, LOW);
-            beatIndicator = false;
-        }
-
-    } else {
         // Key up
-        if (keyReleasedTimer == 0) {
+        } else if(pushbutton.risingEdge()) {
+            keyPressed = false;
             // Turn off visual indicator
             digitalWrite(kLedPin, LOW);
 
@@ -140,7 +133,20 @@ void fullKeyboardUpdate() {
             // Reset relevant data
             keyPressedTimer = 0;
         }
+    }
+    if (keyPressed){
+        updateTimer(&keyPressedTimer);
 
+        // Visual indicator that right now is a good time to release if you want a dot or a dash
+        if (!beatIndicator && (isDot(keyPressedTimer, false) || isDash(keyPressedTimer, false))) {
+            digitalWrite(kLedPin, HIGH);
+            beatIndicator = true;
+        } else if (beatIndicator) {
+            digitalWrite(kLedPin, LOW);
+            beatIndicator = false;
+        }
+    }else{
+        updateTimer(&keyReleasedTimer);
         if (isLetterGap(keyReleasedTimer)) {
             char key = getLetter(elements);
             if (key) {
@@ -154,8 +160,9 @@ void fullKeyboardUpdate() {
                 }
             }
         }
-        updateTimer(&keyReleasedTimer);
     }
+    // Don't sample all the time, take a break
+    delay(1000 / kSampleHz);
 }
 
 void clearElements(byte elements[]) {
@@ -367,6 +374,8 @@ void practiceKeyboardUpdate() {
         Keyboard.release(MODIFIERKEY_SHIFT);
         keyPressedTimer = 0;
     }
+    // Don't sample all the time, take a break
+    delay(1000 / kSampleHz);
 }
 
 void indicateMode() {
