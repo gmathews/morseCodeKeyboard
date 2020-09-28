@@ -365,14 +365,29 @@ char getLetter(byte elements[]) {
 }
 
 void practiceKeyboardUpdate() {
-    if (digitalRead(kKeyPin) == LOW) {
+    averageElementSize = calculateSpeed();
+    byte timeToKeepLedOn = averageElementSize * kLengthDot;
+    short timeToKeepLedOff = averageElementSize * kLengthDash;
+    if (pushbutton.update()) {
         // Key down
-        Keyboard.press(MODIFIERKEY_SHIFT);
-        updateTimer(&keyPressedTimer);
-    } else if (keyPressedTimer > 0) {
+        if (pushbutton.fallingEdge()) {
+            keyPressed = false;
+            Keyboard.press(MODIFIERKEY_SHIFT);
         // Key up
-        Keyboard.release(MODIFIERKEY_SHIFT);
+        } else if(pushbutton.risingEdge()) {
+            keyPressed = false;
+            Keyboard.release(MODIFIERKEY_SHIFT);
+        }
+    }
+    // Use this for the speed indicator
+    updateTimer(&keyPressedTimer);
+    if(!beatIndicator && keyPressedTimer> timeToKeepLedOn){
+        digitalWrite(kLedPin, HIGH);
+        beatIndicator = true;
+    } else if(keyPressedTimer > timeToKeepLedOff){
+        digitalWrite(kLedPin, LOW);
         keyPressedTimer = 0;
+        beatIndicator = false;
     }
     // Don't sample all the time, take a break
     delay(1000 / kSampleHz);
