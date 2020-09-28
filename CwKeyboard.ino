@@ -123,8 +123,8 @@ void fullKeyboardUpdate() {
             }
             allowSpaceInserted = false;
             keyReleasedTimer = 0;
-        // Key up
-        } else if(pushbutton.risingEdge()) {
+            // Key up
+        } else if (pushbutton.risingEdge()) {
             keyPressed = false;
             // Turn off visual indicator
             digitalWrite(kLedPin, LOW);
@@ -135,7 +135,7 @@ void fullKeyboardUpdate() {
             keyPressedTimer = 0;
         }
     }
-    if (keyPressed){
+    if (keyPressed) {
         updateTimer(&keyPressedTimer);
 
         // Visual indicator that right now is a good time to release if you want a dot or a dash
@@ -146,7 +146,7 @@ void fullKeyboardUpdate() {
             digitalWrite(kLedPin, LOW);
             beatIndicator = false;
         }
-    }else{
+    } else {
         updateTimer(&keyReleasedTimer);
         if (isLetterGap(keyReleasedTimer)) {
             char key = getLetter(elements);
@@ -163,6 +163,7 @@ void fullKeyboardUpdate() {
         }
     }
     // Don't sample all the time, take a break
+    // TODO: maybe switch to dynamic frame rate?
     delay(1000 / kSampleHz);
 }
 
@@ -374,18 +375,18 @@ void practiceKeyboardUpdate() {
         if (pushbutton.fallingEdge()) {
             keyPressed = false;
             Keyboard.press(MODIFIERKEY_SHIFT);
-        // Key up
-        } else if(pushbutton.risingEdge()) {
+            // Key up
+        } else if (pushbutton.risingEdge()) {
             keyPressed = false;
             Keyboard.release(MODIFIERKEY_SHIFT);
         }
     }
     // Use this for the speed indicator
     updateTimer(&keyPressedTimer);
-    if(!beatIndicator && keyPressedTimer> timeToKeepLedOn){
+    if (!beatIndicator && keyPressedTimer > timeToKeepLedOn) {
         digitalWrite(kLedPin, HIGH);
         beatIndicator = true;
-    } else if(keyPressedTimer > timeToKeepLedOff){
+    } else if (keyPressedTimer > timeToKeepLedOff) {
         digitalWrite(kLedPin, LOW);
         keyPressedTimer = 0;
         beatIndicator = false;
