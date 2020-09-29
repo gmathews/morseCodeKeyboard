@@ -1,6 +1,8 @@
 #include <Bounce.h>
 
 // Constants
+/* #define DEBUG_PRINTS */
+/* #define RAM_BENCHMARK */
 const byte kModePin = 0;
 const byte kKeyPin = 1;
 const byte kLedPin = 2;
@@ -62,7 +64,9 @@ void resetStateOnModeSwitch() {
 // This runs once on startup
 void setup() {
     // Setup our hardware
+#ifdef DEBUG_PRINTS
     Serial.begin(38400);
+#endif
     analogReadResolution(12);
     pinMode(kModePin, INPUT_PULLUP);
     pinMode(kKeyPin, INPUT_PULLUP);
@@ -97,7 +101,7 @@ void loop() {
 #ifdef RAM_BENCHMARK
     short freeRam = freeMemory();
     // Only bother if this isn't a normal value
-    if(freeRam != 1864){
+    if (freeRam != 1864) {
         Serial.print("free ram: ");
         Serial.println(freeRam);
     }
@@ -107,12 +111,14 @@ void loop() {
 byte calculateSpeed() {
     float speedPinValue = analogRead(kSpeedPin);
     byte speedToElementSize = kMinimumElementSize + ((speedPinValue / (kMaxSpeedPinValue - kMinSpeedPinValue)) * (kMaxElementSize - kMinimumElementSize));
+#ifdef DEBUG_PRINTS
     if (speedToElementSize != averageElementSize) {
         Serial.print("speedPin value: ");
         Serial.print(speedPinValue);
         Serial.print(" element size: ");
         Serial.println(speedToElementSize);
     }
+#endif
     return speedToElementSize;
 }
 
@@ -128,8 +134,10 @@ void fullKeyboardUpdate() {
             // If the last thing printed wasn't a prosign, add a space
             if (allowSpaceInserted && isSpace(keyReleasedTimer)) {
                 Keyboard.print(' ');
+#ifdef DEBUG_PRINTS
                 // Debug what happened
                 Serial.write(' ');
+#endif
             }
             allowSpaceInserted = false;
             keyReleasedTimer = 0;
@@ -166,8 +174,10 @@ void fullKeyboardUpdate() {
                     allowSpaceInserted = isPrintable(key);
                     Keyboard.print(key);
 
+#ifdef DEBUG_PRINTS
                     // Debug what happened
                     Serial.write(key);
+#endif
                 }
             }
         }
@@ -202,6 +212,7 @@ bool isDot(byte length) {
     return isDot(length, true);
 }
 bool isDot(byte length, bool print) {
+#ifdef DEBUG_PRINTS
     if (print) {
         Serial.print(". Desired: ");
         Serial.print(kLengthDot * averageElementSize);
@@ -210,6 +221,7 @@ bool isDot(byte length, bool print) {
         Serial.print(" Actual: ");
         Serial.println(length);
     }
+#endif
     return isLengthWithinTolerance(length, kLengthDot);
 }
 
@@ -217,6 +229,7 @@ bool isDash(byte length) {
     return isDash(length, true);
 }
 bool isDash(byte length, bool print) {
+#ifdef DEBUG_PRINTS
     if (print) {
         Serial.print("- Desired: ");
         Serial.print(kLengthDash * averageElementSize);
@@ -225,6 +238,7 @@ bool isDash(byte length, bool print) {
         Serial.print(" Actual: ");
         Serial.println(length);
     }
+#endif
     return isLengthWithinTolerance(length, kLengthDash);
 }
 
@@ -406,8 +420,10 @@ void practiceKeyboardUpdate() {
 }
 
 void indicateMode() {
+#ifdef DEBUG_PRINTS
     String modeStr = fullKeyboardMode ? "full keyboard" : "practice";
     Serial.println("Entered " + modeStr + " mode.");
+#endif
     // Indicate our mode
     /* digitalWrite(kLedPin, !fullKeyboardMode); */
 }
