@@ -55,6 +55,8 @@ void resetStateOnModeSwitch() {
     keyPressed = false;
     // Make sure we don't get stuck
     Keyboard.releaseAll();
+    // Turn off LED
+    digitalWrite(kLedPin, LOW);
 }
 
 // This runs once on startup
@@ -91,7 +93,15 @@ void loop() {
     } else {
         practiceKeyboardUpdate();
     }
-
+    // See how much ram we have
+#ifdef RAM_BENCHMARK
+    short freeRam = freeMemory();
+    // Only bother if this isn't a normal value
+    if(freeRam != 1864){
+        Serial.print("free ram: ");
+        Serial.println(freeRam);
+    }
+#endif
 }
 
 byte calculateSpeed() {
@@ -408,3 +418,22 @@ void updateTimer(unsigned short *timer) {
         (*timer)++;
     }
 }
+
+#ifdef RAM_BENCHMARK
+#ifdef __arm__
+// should use uinstd.h to define sbrk but Due causes a conflict
+extern "C" char* sbrk(int incr);
+#else  // __ARM__
+extern char *__brkval;
+#endif  // __arm__
+int freeMemory() {
+    char top;
+#ifdef __arm__
+    return &top - reinterpret_cast<char*>(sbrk(0));
+#elif defined(CORE_TEENSY) || (ARDUINO > 103 && ARDUINO != 151)
+    return &top - __brkval;
+#else  // __arm__
+    return __brkval ? &top - __brkval : &top - __malloc_heap_start;
+#endif  // __arm__
+}
+#endif
