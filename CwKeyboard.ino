@@ -1,8 +1,8 @@
 #include <Bounce.h>
 
 // Constants
-/* #define DEBUG_PRINTS */
-/* #define RAM_BENCHMARK */
+#define DEBUG_PRINTS
+#define RAM_BENCHMARK
 const byte kModePin = 0;
 const byte kKeyPin = 1;
 const byte kLedPin = 2;
@@ -38,10 +38,10 @@ unsigned short keyReleasedTimer;
 bool beatIndicator;
 bool allowSpaceInserted;
 // The size of each element
-byte elements[kNumberOfElementsToTrack];
+unsigned short elements[kNumberOfElementsToTrack];
 // Used to determine what is a dash, dot, etc...
-byte averageElementSize;
-byte elementTolerance;
+unsigned short averageElementSize;
+unsigned short elementTolerance;
 
 // Track the status of the button and handle debounce
 bool keyPressed;
@@ -101,16 +101,16 @@ void loop() {
 #ifdef RAM_BENCHMARK
     short freeRam = freeMemory();
     // Only bother if this isn't a normal value
-    if (freeRam != 1864) {
+    if (freeRam != 1984) {
         Serial.print("free ram: ");
         Serial.println(freeRam);
     }
 #endif
 }
 
-byte calculateSpeed() {
+unsigned short calculateSpeed() {
     float speedPinValue = analogRead(kSpeedPin);
-    byte speedToElementSize = kMinimumElementSize + ((speedPinValue / (kMaxSpeedPinValue - kMinSpeedPinValue)) * (kMaxElementSize - kMinimumElementSize));
+    unsigned short speedToElementSize = kMinimumElementSize + ((speedPinValue / (kMaxSpeedPinValue - kMinSpeedPinValue)) * (kMaxElementSize - kMinimumElementSize));
 #ifdef DEBUG_PRINTS
     if (speedToElementSize != averageElementSize) {
         Serial.print("speedPin value: ");
@@ -187,31 +187,31 @@ void fullKeyboardUpdate() {
     delay(1000 / kSampleHz);
 }
 
-void clearElements(byte elements[]) {
+void clearElements(unsigned short elements[]) {
     // We can clear everything by clearing the capacity
     elements[0] = 0;
 }
 
-void updateElements(byte elements[], unsigned short keyPressTime) {
+void updateElements(unsigned short elements[], unsigned short keyPressTime) {
     // Get our next available index
-    byte currentCapacity = elements[0];
+    unsigned short currentCapacity = elements[0];
     // First spot is used to track current capacity
     if (currentCapacity < kNumberOfElementsToTrack - 1) {
         currentCapacity++;
-        elements[currentCapacity] = keyPressTime > 255 ? 255 : (byte)keyPressTime;
+        elements[currentCapacity] = keyPressTime;
         elements[0] = currentCapacity;
     }
 }
 
-bool isLengthWithinTolerance(byte length, byte desiredLength) {
+bool isLengthWithinTolerance(unsigned short length, unsigned short desiredLength) {
     // Require minimum length to encourage good keying
     return length > (desiredLength * averageElementSize - elementTolerance) && length < (desiredLength * averageElementSize + elementTolerance);
 }
 
-bool isDot(byte length) {
+bool isDot(unsigned short length) {
     return isDot(length, true);
 }
-bool isDot(byte length, bool print) {
+bool isDot(unsigned short length, bool print) {
 #ifdef DEBUG_PRINTS
     if (print) {
         Serial.print(". Desired: ");
@@ -225,10 +225,10 @@ bool isDot(byte length, bool print) {
     return isLengthWithinTolerance(length, kLengthDot);
 }
 
-bool isDash(byte length) {
+bool isDash(unsigned short length) {
     return isDash(length, true);
 }
-bool isDash(byte length, bool print) {
+bool isDash(unsigned short length, bool print) {
 #ifdef DEBUG_PRINTS
     if (print) {
         Serial.print("- Desired: ");
@@ -242,16 +242,16 @@ bool isDash(byte length, bool print) {
     return isLengthWithinTolerance(length, kLengthDash);
 }
 
-bool isLetterGap(byte length) {
+bool isLetterGap(unsigned short length) {
     return isLengthWithinTolerance(length, kLengthGapLetter);
 }
 
-bool isSpace(byte length) {
+bool isSpace(unsigned short length) {
     return isLengthWithinTolerance(length, kLengthGapWord);
 }
 
-char getLetter(byte elements[]) {
-    byte currentCapacity = elements[0];
+char getLetter(unsigned short elements[]) {
+    unsigned short currentCapacity = elements[0];
     if (currentCapacity < 1) {
         return 0; // Nothing yet
     }
@@ -379,7 +379,7 @@ char getLetter(byte elements[]) {
         else return kEraseLetter;
     } else if (currentCapacity == 8) {
         //........(Backspace)
-        for (byte i = 0; i < currentCapacity; i++) {
+        for (unsigned short i = 0; i < currentCapacity; i++) {
             if (!isDot(elements[i + 1])) {
                 return kEraseLetter;
             }
@@ -392,7 +392,7 @@ char getLetter(byte elements[]) {
 
 void practiceKeyboardUpdate() {
     averageElementSize = calculateSpeed();
-    byte timeToKeepLedOn = averageElementSize * kLengthDot;
+    unsigned short timeToKeepLedOn = averageElementSize * kLengthDot;
     short timeToKeepLedOff = averageElementSize * kLengthDash;
     if (pushbutton.update()) {
         // Key down
