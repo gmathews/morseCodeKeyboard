@@ -1,8 +1,8 @@
 #include <Bounce.h>
 
 // Constants
-#define DEBUG_PRINTS
-#define RAM_BENCHMARK
+/* #define DEBUG_PRINTS */
+/* #define RAM_BENCHMARK */
 const byte kModePin = 0;
 const byte kKeyPin = 1;
 const byte kLedPin = 2;
@@ -25,9 +25,8 @@ const byte kLengthGapWord = 7;
 const float kElementSizeTolerance = 0.25;
 const short kMaxSpeedPinValue = 3200;
 const short kMinSpeedPinValue = 0;
-const byte kMinimumElementSize = 6;
-// WARNING: Do not exceed 36, else kLengthGapWord will have wraparound
-const byte kMaxElementSize = 30;
+const byte kMinimumElementSize = 10;
+const byte kMaxElementSize = 50;
 
 // State variables
 bool fullKeyboardMode;
