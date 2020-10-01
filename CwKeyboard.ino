@@ -9,7 +9,7 @@ const byte kLedPin = 2;
 const byte kSpeedPin = 23;
 // Configuration constants
 const byte kMinModeSwitchPressCycles = 10;
-const int kSampleHz = 100;
+const int kSampleHz = 500;
 const unsigned short kMaxTimerValue = 65535;
 // NOTE: The first byte is used to track our used capacity
 const byte kNumberOfElementsToTrack = 9;
@@ -111,6 +111,8 @@ void loop() {
 unsigned short calculateSpeed() {
     float speedPinValue = analogRead(kSpeedPin);
     unsigned short speedToElementSize = kMinimumElementSize + ((speedPinValue / (kMaxSpeedPinValue - kMinSpeedPinValue)) * (kMaxElementSize - kMinimumElementSize));
+    // Adjust for our kSampleHz
+    speedToElementSize *= (kSampleHz * 10) / 1000;
 #ifdef DEBUG_PRINTS
     if (speedToElementSize != averageElementSize) {
         Serial.print("speedPin value: ");
